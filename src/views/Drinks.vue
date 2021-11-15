@@ -22,9 +22,9 @@
 
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              New Drink
-            </v-btn>
+            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on"
+              >New Drink</v-btn
+            >
           </template>
           <v-card>
             <v-card-title>
@@ -70,12 +70,8 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">
-                Cancel
-              </v-btn>
-              <v-btn color="blue darken-1" text @click="save">
-                Save
-              </v-btn>
+              <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+              <v-btn color="blue darken-1" text @click="save"> Save </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -100,9 +96,7 @@
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon small class="mr-2" @click="editItem(item)">
-        mdi-pencil
-      </v-icon>
+      <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
       <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
     </template>
   </v-data-table>
@@ -110,6 +104,7 @@
 
 <script>
 //tambahkan ini untuk import database reference
+import { drinkRef } from "../firebase";
 
 export default {
   data: () => ({
@@ -149,6 +144,9 @@ export default {
   }),
 
   //tambahkan attribute firebase disini
+  firebase: {
+    drinks: drinkRef,
+  },
 
   computed: {
     formTitle() {
@@ -179,8 +177,17 @@ export default {
     },
 
     //tambahkan ini untuk delete data
-    deleteItemConfirm() {},
-
+    deleteItemConfirm() {
+      //delete
+      drinkRef
+        .child(this.editedIndex)
+        .remove()
+        .then(() => {
+          alert("Berhasil Hapus Data!");
+        })
+        .catch((err) => [alert("Gagal Hapus Data:", err)]);
+      this.closeDelete();
+    },
     close() {
       this.dialog = false;
       this.$nextTick(() => {
@@ -198,7 +205,27 @@ export default {
     },
 
     // Tambahkan code method save
-    save() {},
+    save() {
+      if (this.editedIndex != -1) {
+        //edit data
+        drinkRef
+          .child(this.editedIndex)
+          .set(this.editedItem)
+          .then(() => {
+            alert("Berhasil Edit Data !");
+          })
+          .catch((err) => [alert("Gagal Edit Data:", err)]);
+      } else {
+        //creat data
+        drinkRef
+          .push(this.editedItem)
+          .then(() => {
+            alert("Berhasil Tambah Data!");
+          })
+          .catch((err) => [alert("Gagal Tambah Data:", err)]);
+      }
+      this.close();
+    },
   },
 };
 </script>
